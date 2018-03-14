@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+
+#  make date.html from beginning.html
+#  generate date.md.html from date.md
+#  add ending.html to date.html
+#  add date link to slackups_master.md
+#  make slackups_master.html from beginning.html
+#  generate slackups_master.md.html from slackups_master.md
+#  add ending.html to slackups_master.html
+
+
+date=$(date +%Y-%m-%d)
+resource_ending='resource/ending.html'
+resource_beginning='resource/beginning.html'
+resource_slackups_master_md='resource/slackups_master.md'
+content_slackups_master_html='content/slackups_master.html'
+resource_slackups_master_md_html='resource/slackups_master.md.html'
+
+# Check to see if date.html already exists
+if [[ -e content/$date.html ]]; then
+    echo "$date.html already exists"
+else
+    if [[ -e resource/$date.md.html ]]; then
+        echo "$date.md.html already exists"
+    else
+        while read prep; do
+            echo "$prep" >> content/$date.html
+        done < $resource_beginning
+
+        markdown slackups/$date.md > resource/$date.md.html
+
+        while read content; do
+            echo "$content" >> content/$date.html
+        done < resource/$date.md.html
+
+        while read ending; do
+            echo "$ending" >> content/$date.html
+        done < $resource_ending
+    fi
+fi
+
+slackup_entry="[$date - slackup]($date.html)"
+
+if [[ -e $resource_slackups_master_md ]]; then
+    if grep -q "## Slackups" $resource_slackups_master_md; then
+        if grep -q $date.html $resource_slackups_master_md; then
+            echo "Slackup entry already exists"
+        fi
+    fi
+else
+    echo "## Slackups" >> $resource_slackups_master_md
+    sed -i "/## Slackups/a $slackup_entry" $resource_slackups_master_md 
+
+    if [[ ! -e $content_slackups_master_html ]]; then
+        touch $content_slackups_master_html
+    else
+        rm $content_slackups_master_html
+    fi
+
+    while read prep; do
+        echo "$prep" >> $content_slackups_master_html
+    done < $resource_beginning
+
+    markdown $resource_slackups_master_md > $resource_slackups_master_md_html
+
+    while read content; do
+        echo "$content" >> $content_slackups_master_html
+    done < $resource_slackups_master_md_html
+
+    while read ending; do
+        echo "$ending" >> $content_slackups_master_html
+    done < $resource_ending
+fi
