@@ -4,4 +4,4 @@ How this is intended to work is that you create a slackup.md (Its a standup but 
 
 You do need to `sudo apt-get install markdown` in order to use this script.
 
-when you first clone the file, you'll need to run `bash bootstrap.sh` or `mkdir content slackups`
+when you first clone the repo, you'll need to run `bash bootstrap.sh` or `mkdir content slackups`
